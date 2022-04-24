@@ -1,0 +1,174 @@
+# Raster Operations
+
+Downloading Cal-Adapt climate data as rasters makes sense if your analysis involves methods that require the entire surface, and/or uses raster methods such as delineating isopleths, classification, or stacking on other raster layers. You may also want to use rasters simply for convenience, for example if you have a lot of sample points and/or will be extracting values many times. Downloading rasters only has to be done once, after which you can query them locally.
+
+In this chapter, we'll see how to download rasters to compute the number of frost days across Fresno county, which is a large county that includes both valley and mountainous areas. Our first output will be a raster that shows the **number of frost days per year** for 30 years of observed minimum daily temperature.
+
+## Load Packages
+
+As usual, we start by loading a bunch of packages into memory and specifying our preferences for conflicting function names:
+
+```{r load_libraries_ch8, message = FALSE, warning = FALSE}
+library(caladaptr)
+library(units)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(sf)
+library(stars)
+```
+
+Set conflicted preferences:
+
+```{r conflicted_ch8}
+library(conflicted)
+conflict_prefer("filter", "dplyr", quiet = TRUE)
+conflict_prefer("count", "dplyr", quiet = TRUE)
+conflict_prefer("select", "dplyr", quiet = TRUE)
+```
+
+## Fetch TIFs
+
+We'll start by computing the number of frost days from observed historic temperature data from the Livneh dataset.
+
+```{r fres_cap}
+fres_cap <- ca_loc_aoipreset(type = "counties", idfld = "fips", idval = "06019") %>%
+  ca_livneh(TRUE) %>% 
+  ca_cvar("tasmin") %>% 
+  ca_period("day") %>% 
+  ca_years(start = 1981, end = 2010) 
+
+fres_cap %>% ca_preflight(check_for = "getrst")
+
+plot(fres_cap, locagrid = TRUE)
+```
+
+\
+
+To download TIF files, we need to specify an output directory. Below we'll put them in a directory under R's home directory (i.e., My Documents):
+
+```{r tiffs_dir}
+(tiffs_dir <- file.path("~", "ca_data/fresno"))
+if (!file.exists(tiffs_dir)) dir.create(tiffs_dir, recursive = TRUE)
+```
+
+\
+
+Now we can download the tif(s) using `ca_getrst_stars()`:
+
+```{r fres_fn}
+fres_fn <- fres_cap %>% 
+  ca_getrst_stars(out_dir = tiffs_dir, mask = TRUE, quiet = FALSE, 
+                  normalize_path = TRUE, overwrite = FALSE)
+
+list.files(tiffs_dir)
+```
+
+\
+
+## Import TIFs in R
+
+At this point we have TIF files, but they are not loaded into R. The recommended way to import them is as stars objects using:
+
+```{r fres_star_lst, results='hold'}
+fres_star_lst <- fres_fn %>% ca_stars_read()
+```
+
+\
+
+`ca_stars_read()` returns a list. Let's see what's in it:
+
+```{r fres_star_lst_explore}
+class(fres_star_lst)
+length(fres_star_lst)
+class(fres_star_lst[[1]])
+fres_star_lst[[1]]
+```
+
+\
+
+In summary, our stars object has 42 columns and 28 rows, and 10,957 bands or layers, which is one layer for each day (365 * 30 = 10,950).
+
+Next, we have compute the number of frost days per year. Normally, we would try to split the 'date' dimension into two (year and Julian date), but that won't work because years have different number of days. Instead we'll loop through the years, generate a stars object with the number of freeze days, and then combine them all back together.
+
+Step 1 is to generate the years:
+
+```{r years_int}
+## Get the years from the values of the "date" dimension
+years_int <- fres_star_lst[[1]] %>% 
+  st_get_dimension_values("date") %>% 
+  as.Date() %>% 
+  year() %>% 
+  unique() %>% 
+  sort()
+
+years_int
+```
+
+\
+
+Next, create an empty list to hold stars objects:
+
+```{r numfrzday_lst}
+numfrzday_lst <- list()
+```
+
+\
+
+Next, loop through the years and add a stars object to the list:
+
+```{r numfrzday_lst_build}
+for (i in 1:length(years_int)) {
+  yr <- years_int[i]
+  numfrzday_lst[[as.character(yr)]] <- (fres_star_lst[[1]] %>% 
+    filter(year(date) == yr) < 0) %>% 
+    setNames("freeze_yn") %>% 
+    st_apply(c("x", "y"), sum) %>% 
+    setNames("num_fd")
+}
+
+names(numfrzday_lst)
+```
+
+\
+
+Combine the elements of `numfrzday_lst` into a single stars object:
+
+```{r fres_numfd_year}
+fres_numfd_year <- do.call(c, c(numfrzday_lst,
+                                list(along = list(year = years_int)))) 
+
+fres_numfd_year
+```
+
+\
+
+Now we can plot:
+
+```{r}
+plot(fres_numfd_year, axes = TRUE)
+```
+
+<p style="font-style:italic;">More coming soon...</p>
+
+<!-------
+see also: `rasters_ideas-for-notebooks.Rmd`
+
+download a daily raster, and use it to query daily data for a series of points
+
+show them how to use gdal with a daily raster (ask Brian first)
+
+GDD - create a GDD layer for a county
+
+Use stars::st_apply with chill or degree days, make a climate analogue
+
+Frost
+ - first of the year, temporal distribution
+ - Last Frost Date
+
+Climate Analogs
+ - look at Igor's paper on urban trees
+
+----->
+

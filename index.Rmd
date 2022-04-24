@@ -1,0 +1,111 @@
+---
+title: "Cooking with Cal-Adapt Climate Data in R"
+date: "April 2022"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [references.bib]
+link-citations: true
+# url: your book url like https://bookdown.org/yihui/bookdown
+# cover-image: path to the social sharing image like images/cover.jpg
+# description: |
+#   This is a minimal example of using the bookdown package to write a book.
+#   The HTML output format for this example is bookdown::gitbook,
+#   set in the _output.yml file.
+# link-citations: yes
+# github-repo: rstudio/bookdown-demo
+---
+
+```{r setup_index, include = FALSE}
+library(DiagrammeR)
+library(DiagrammeRsvg)
+source("gv2svg.R", local = knitr::knit_global())
+library(htmltools)
+```
+
+# Introduction
+
+[Cal-Adapt](https://cal-adapt.org/){target="_blank" rel="noopener"} is a website and data portal for downscaled climate data for California and neighboring states in the western USA. Developed with support and guidance from CA state agencies, it is the go-to source for modeled climate data.
+
+<div style="width:300px; margin:1em auto; text-align:center;">
+![](./images/loca_grid_extent_600x646x256.png)<br/>
+*Coverage area for Cal-Adapt LOCA downscaled climate data*
+</div>
+
+[`caladaptR`](https://ucanr-igis.github.io/caladaptr/){target="_blank" rel="noopener"} is a R package that makes it easier to import climate data from [Cal-Adapt](https://cal-adapt.org/){target="_blank" rel="noopener"} into R using the Cal-Adapt API. As shown in the graphic below, `caladaptR` can import Cal-Adapt data as tables or rasters. After that, you can turn to other R packages to wrangle, analyze, and visualize the results. 
+
+![](./images/caladaptr_role_480x432x256.png){style="display:block; margin:1em auto;"}
+This Cookbook provides code examples for importing data via the Cal-Adapt API, and what you can do with the data once you get it into R. In addition to this Cookbook, readers may wish to check out the following package vignettes:
+
+<div style="margin-left:1em;">
+
+[**API Requests**](https://ucanr-igis.github.io/caladaptr/articles/api-requests.html){target="_blank" rel="noopener"}. Creating API requests.
+
+[**Large Queries**](https://ucanr-igis.github.io/caladaptr/articles/large-queries.html){target="_blank" rel="noopener"}. Techniques for querying large volumes of data.
+
+[**Rasters Part I: Download, Combine, Subset, and Compute Pixel Summaries**](https://ucanr-igis.github.io/caladaptr/articles/rasters-pt1.html){target="_blank" rel="noopener"}. Basics of downloading rasters.
+
+[**Rasters Part II: Six-Dimensional Climate Data Cubes and Spatial Queries**](https://ucanr-igis.github.io/caladaptr/articles/rasters-pt2.html){target="_blank" rel="noopener"}. Indexing and slicing rasters by date, GCM, and scenario.
+
+[**Rasters Part III: Downloading Rasters for Large Areas**](https://ucanr-igis.github.io/caladaptr/articles/rasters-pt3.html){target="_blank" rel="noopener"}. Techniques for downloading large rasters.
+
+</div>
+
+<div style="background-color:#ddd; border:4px solid gray; width:480px; margin:3em auto; padding:15px;">
+<p style="text-align:center; font-size:120%;">**Collaborators Wanted!**</p>
+
+<p>If you have R code that analyzes climate data, we'd love to help you share it! Create a pull request, GitHub issue, or just email us with the code you'd like to contribute.</p>
+
+</div>
+
+## General Workflow
+
+The general workflow for using caladaptR is:
+
+```{r workflow, echo = FALSE, cache = TRUE}
+workflow_gv <- grViz("digraph flowchart {
+  node [fontname = Helvetica, shape = rectangle]
+  tab1 [label = '@@1']
+  tab2 [label = '@@2']
+  tab3 [label = '@@3']
+  tab4 [label = '@@4']
+  tab5 [label = '@@5']
+
+  # edge definitions with the node IDs
+  tab1 -> tab2 -> tab3 -> tab4 -> tab5;
+  }
+
+  [1]: '1) Determine your location(s) of interest.\\nYou can use your own points or polygons,\\nor one of the preset areas-of-interest'
+  [2]: '2) Create an API Request object'
+  [3]: '3) Feed the API Request into a function that fetches data'
+  [4]: '4) Wrangle the results into the format you require\\n(e.g., filtering, sorting, joining, reshaping,\\nadd calculated columns, etc.)'
+  [5]: '5) Continue on with your analysis or visualization'")
+
+workflow_html <- workflow_gv %>% gv2svg(width = 450) 
+
+htmltools::HTML(paste0("<center>", workflow_html, "</center>"))
+```
+
+## Using Climate Data Wisely
+
+There are wise and unwise uses of climate data. If you want to get the weather forecast for San Diego on July 4, 2085, we can show you how to do that (see Chapter xx). That would of course be an unwise use of modeled climate data.
+
+To use climate data *wisely* and *responsibly*, you need to understand a little bit about how climate models work, what the forecasts do and do not represent, and follow some best practices. These topics are well beyond the scope of this Cookbook, but some general tips include:
+ 
+- When summarizing data from climate models, always examine time spans of **2-3 decades**. By definition, *climate* is the range of *weather* variability over periods of 2-3 decades or more. That's what the climate models have been designed to characterize, and they do it very well at this time scale. Using the API, you can drill down and get the yearly, monthly, or even daily data, and derive metrics at those scales (e.g., frost days). But those metrics are only meaningful if you aggregate at least 2 or 3 decades worth.
+
+- When looking at climate change, you generally should consider both the **central tendency** (i.e., trending up or down), as well as the **range of variability**. Both are important for most use cases.  
+
+- The biggest source of uncertainty about future climate conditions is the amount of greenhouse gas emissions. Since no knows the future, it is prudent to consider both the **medium and high emissions scenarios**. 
+
+- Cal-Adapt has both observed and modeled data for the historic period. The modeled data do a good job capturing the overall patterns of the observed record, but modeled data and observed data represent different things. They are **apples and oranges**, and you shouldn't compare them directly. This means if your goal is to compare the past and the future, you need to summarize 20-30 years of model historic data, and compare that to a summary of 20-30 years of modeled future data.
+
+## Video Overviews
+
+If reading is not your thing, the two videos below provide an overview of the features of caladaptR and show some sample code.
+
+<center><iframe width="560" height="315" src="https://www.youtube.com/embed/6sDwXPbSYOQ?rel=0" title="YouTube video player" frameborder="1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></center>
+
+\
+
+<center><iframe width="560" height="315" src="https://www.youtube.com/embed/APCIBs35BJg?rel=0" title="YouTube video player" frameborder="1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></center>
+

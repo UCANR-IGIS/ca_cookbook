@@ -1,0 +1,187 @@
+# API Requests
+
+```{r setup, include = FALSE}
+library(caladaptr)
+library(sf, quietly = TRUE)
+library(leaflet, quietly = TRUE)
+library(dplyr, quietly = TRUE)
+```
+
+## Constructing Cal-Adapt API Requests
+
+In order to fetch data thru the Cal-Adapt API, you have to first construct an API Request object. The basic elements of an API Request include:
+
+- location(s)  
+- dataset(s)  
+- date range  
+- temporal aggregation period  
+- spatial aggregation function  
+
+In practice, you build an API request object by mixing and matching different functions that provide difference pieces of the request, joining them by pipes. Example:
+
+**Anatomy of an API Request Object**
+
+```
+library(caladaptr)
+sacramento_cap <- 
+  ca_loc_pt(coords = c(-119.0, 35.4)) %>%   ## location
+  ca_cvar("tasmin") %>%                     ## climate variable (part of the dataset specification)
+  ca_gcm(gcms[1:4]) %>%                     ## climate models (part of the dataset specification)
+  ca_scenario("rcp45") %>%                  ## emissions scenario (part of the dataset specification)
+  ca_period("year") %>%                     ## temporal aggregation
+  ca_years(start = 2070, end = 2099)        ## date range
+```
+
+Notes:
+
+- the order of the functions that comprise an API Request object doesn't matter  
+- typically you save the API request as an object so you can feed it into other functions  
+- nearly all of the functions in `caladaptr` start with `ca_`  
+- an API Request object doesn't contain any climate data, that's a separate step
+
+## Checking an API Request
+
+There are a few ways you can check an API Request object, prior to using it to fetch data from the server.
+
+- print it to the console
+- plot it (will show a map of the location(s))
+- feed it into `ca_preflight()`
+
+These methods will be shown below.
+
+## Locations of Interest
+
+The location(s) of interest in an API Request can be specified by:
+
+i) a data frame with columns for longitude-latitude coordinates
+ii) a point or polygon simple feature data frame from the sf package  
+iii) the name of a preset area of interest
+
+An API Request object can contain multiple locations, but they must all be the same type. You can't mix and match different types of locations in the same API request. 
+
+The coverage area of Cal-Adapt's LOCA downscaled data is:
+
+```{r loca_area, cache=TRUE, results='hold'}
+library(sf, quietly = TRUE)
+loca_bnd_sf <- system.file("extdata", "loca_area.geojson", package = "caladaptr") %>% 
+  sf::st_read(quiet = TRUE)
+
+library(leaflet, quietly = TRUE)
+leaflet(loca_bnd_sf) %>% addTiles() %>% addPolygons()
+```
+
+### Longitude-Latitude Coordinates
+
+You can specify the location of an API request using longitude-latitude coordinates. Use the `ca_loc_pt()` function:
+
+```{r api01_pt_loc, results='hold', cache = TRUE}
+mysites_df <- data.frame(id = 1:3,
+                     lon = c(-123.2, -122.4, -123.5),
+                     lat = c(42.1, 41.8, 40.5))
+mysites_df
+
+mysites_cap <- ca_loc_pt(coords = mysites_df[,2:3], id = mysites_df[,1]) %>%     
+  ca_gcm(gcms[1:4]) %>%     
+  ca_scenario("rcp45") %>%
+  ca_cvar(c("tasmax")) %>%
+  ca_period("year") %>% 
+  ca_years(start = 2040, end = 2070)   
+
+mysites_cap
+```
+
+Notes: 
+
+- the data frame you pass for `coords` should contain two and only two columns: longitude and latitude. The column names are not important, but they must be in that order.
+- the `id` argument lets you pass a vector or column of location id that will be returned with the climate data so you can join them back to the locations
+- an API request should not contain duplicate locations  
+
+### Simple Feature Data Frame
+
+You can query your own geometry using a simple feature data frame (`sf` package) with `ca_loc_sf()`. Points and polygons are supported.
+
+```{r pinnacles_cap}
+pinnacles_bnd <- st_read("https://github.com/UCANR-IGIS/caladaptr-res/raw/main/geoms/pinnacles_bnd.geojson")
+
+pincl_cap <- ca_loc_sf(loc = pinnacles_bnd) %>%     
+  ca_gcm(gcms[1:4]) %>%     
+  ca_scenario("rcp45") %>%
+  ca_cvar(c("tasmax")) %>%
+  ca_period("year") %>% 
+  ca_years(start = 2040, end = 2070) %>% 
+  ca_options(spatial_ag = "mean")
+
+pincl_cap %>% plot(locagrid = TRUE, static = TRUE)
+
+pincl_cap %>% ca_preflight()
+```
+
+Notes
+
+- the sf object needs have a CRS (which will be transformed to geographic coordinates if needed)
+- Multipart points are not supported (use `st_cast` to convert them to simple points)
+- to join the climate data back to the sf object, use the argument `idfld` to pass a column from the sf object with unique values
+
+### Preset Area of Interest
+
+The Cal-Adapt API has its own polygon areas-of-interest (also known as boundary layers). Using one of the preset areas-of-interest simplifies things, because you don't have to prepare and submit your own polygon object. The preset areas-of-interest include:
+
+```{r aoipreset_types}
+aoipreset_types
+```
+
+To get data for one or more features from one of these preset AOIs, use
+
+```{r sd_cnty_cap}
+glenn_cnty_cap <- ca_loc_aoipreset(type = "counties", idfld = "fips", idval = "06021") %>% 
+  ca_cvar("pr") %>% 
+  ca_scenario("rcp45") %>% 
+  ca_period("day") %>% 
+  ca_gcm(gcms[1:4]) %>% 
+  ca_years(start = 2036, end = 2065) %>% 
+  ca_options(spatial_ag = "mean")
+
+glenn_cnty_cap %>% ca_preflight()
+
+plot(glenn_cnty_cap, locagrid = TRUE)
+```
+
+\
+
+The only hard part about using preset areas-of-interest is finding the id value(s) of the feature(s) you're interested in. For census tracts and counties, this might be a FIPS code. For watersheds, it's a HUC10 code. For other preset AOIs, it may a name or something else. To find out which fields you can use to specify a feature, use the built-in constant `aoipreset_idflds`. For example, if we wanted to see which fields we can use to specify a congressional district, we could run:
+
+```{r aoipreset_idflds}
+aoipreset_idflds$cdistricts
+```
+
+\
+
+Next, to find the id value of features of interest, look at the attribute table of the layer. You can import any preset area-of-interest layer into R as a sf object using `ca_aoipreset_geom()`. For example, suppose we want to get historical precipitation for the north eastern most part of the Sierra Nevada range as defined by the 4th Climate Change Assessment. We can find the id for this polygon with:
+
+```{r ccc4aregions_sf}
+aoipreset_idflds$ccc4aregions
+ccc4aregions_sf <- ca_aoipreset_geom("ccc4aregions", quiet = TRUE)
+glimpse(ccc4aregions_sf)
+ccc4aregions_sf$name
+```
+
+\
+
+With that info in hand, we can set up our API Object as follows:
+
+```{r sranvd_north_cap}
+srnv_ne_cap <- ca_loc_aoipreset(type = "ccc4aregions", 
+                                   idfld = "name", 
+                                   idval = "Sierra Nevada Mountains NE Sierra") %>%     
+  ca_livneh(TRUE) %>% 
+  ca_cvar(c("tasmax")) %>%
+  ca_period("year") %>% 
+  ca_years(start = 1980, end = 2010) %>% 
+  ca_options(spatial_ag = "mean")
+
+srnv_ne_cap %>% ca_preflight()
+
+srnv_ne_cap %>% plot(locagrid = TRUE, static = FALSE)
+```
+
+

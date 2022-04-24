@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 Methods for Computing Climate Metrics | Cooking with Cal-Adapt Climate Data in R</title>
+  <meta name="description" content="Chapter 4 Methods for Computing Climate Metrics | Cooking with Cal-Adapt Climate Data in R" />
+  <meta name="generator" content="bookdown 0.25 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 Methods for Computing Climate Metrics | Cooking with Cal-Adapt Climate Data in R" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 Methods for Computing Climate Metrics | Cooking with Cal-Adapt Climate Data in R" />
+  
+  
+  
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="03_time-series-viz.html"/>
+<link rel="next" href="05_agroclimate-metrics.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.1.0.9000/leaflet.js"></script>
+<script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script>
+<script src="libs/leaflet-providers-plugin-2.1.0.9000/leaflet-providers-plugin.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./"><strong>Cooking with Cal-Adapt</strong></a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction<span></span></a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#general-workflow"><i class="fa fa-check"></i><b>1.1</b> General Workflow<span></span></a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#using-climate-data-wisely"><i class="fa fa-check"></i><b>1.2</b> Using Climate Data Wisely<span></span></a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#video-overviews"><i class="fa fa-check"></i><b>1.3</b> Video Overviews<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="02_api-requests.html"><a href="02_api-requests.html"><i class="fa fa-check"></i><b>2</b> API Requests<span></span></a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="02_api-requests.html"><a href="02_api-requests.html#constructing-cal-adapt-api-requests"><i class="fa fa-check"></i><b>2.1</b> Constructing Cal-Adapt API Requests<span></span></a></li>
+<li class="chapter" data-level="2.2" data-path="02_api-requests.html"><a href="02_api-requests.html#checking-an-api-request"><i class="fa fa-check"></i><b>2.2</b> Checking an API Request<span></span></a></li>
+<li class="chapter" data-level="2.3" data-path="02_api-requests.html"><a href="02_api-requests.html#locations-of-interest"><i class="fa fa-check"></i><b>2.3</b> Locations of Interest<span></span></a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="02_api-requests.html"><a href="02_api-requests.html#longitude-latitude-coordinates"><i class="fa fa-check"></i><b>2.3.1</b> Longitude-Latitude Coordinates<span></span></a></li>
+<li class="chapter" data-level="2.3.2" data-path="02_api-requests.html"><a href="02_api-requests.html#simple-feature-data-frame"><i class="fa fa-check"></i><b>2.3.2</b> Simple Feature Data Frame<span></span></a></li>
+<li class="chapter" data-level="2.3.3" data-path="02_api-requests.html"><a href="02_api-requests.html#preset-area-of-interest"><i class="fa fa-check"></i><b>2.3.3</b> Preset Area of Interest<span></span></a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html"><i class="fa fa-check"></i><b>3</b> Time-Series Plots<span></span></a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#load-packages"><i class="fa fa-check"></i><b>3.1</b> Load Packages<span></span></a></li>
+<li class="chapter" data-level="3.2" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#time-series-plots-1"><i class="fa fa-check"></i><b>3.2</b> Time Series Plots<span></span></a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#fetch-some-data"><i class="fa fa-check"></i><b>3.2.1</b> Fetch Some Data<span></span></a></li>
+<li class="chapter" data-level="3.2.2" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#plot-1.-single-climate-variable-single-rcp"><i class="fa fa-check"></i><b>3.2.2</b> Plot 1. Single Climate Variable &amp; Single RCP<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#multiple-emissions-scenarios"><i class="fa fa-check"></i><b>3.3</b> Multiple Emissions Scenarios<span></span></a></li>
+<li class="chapter" data-level="3.4" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#overlay-a-trend-line"><i class="fa fa-check"></i><b>3.4</b> Overlay a Trend Line<span></span></a></li>
+<li class="chapter" data-level="3.5" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#historic-and-future-data-together"><i class="fa fa-check"></i><b>3.5</b> Historic and Future Data Together<span></span></a></li>
+<li class="chapter" data-level="3.6" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#overlay-a-32-model-ensemble"><i class="fa fa-check"></i><b>3.6</b> Overlay a 32-model Ensemble<span></span></a></li>
+<li class="chapter" data-level="3.7" data-path="03_time-series-viz.html"><a href="03_time-series-viz.html#visualize-variability-with-histograms"><i class="fa fa-check"></i><b>3.7</b> Visualize Variability with Histograms<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="04_metrics-methods.html"><a href="04_metrics-methods.html"><i class="fa fa-check"></i><b>4</b> Methods for Computing Climate Metrics<span></span></a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="04_metrics-methods.html"><a href="04_metrics-methods.html#load-packages-1"><i class="fa fa-check"></i><b>4.1</b> Load packages<span></span></a></li>
+<li class="chapter" data-level="4.2" data-path="04_metrics-methods.html"><a href="04_metrics-methods.html#fetch-some-sample-data"><i class="fa fa-check"></i><b>4.2</b> Fetch Some Sample Data<span></span></a></li>
+<li class="chapter" data-level="4.3" data-path="04_metrics-methods.html"><a href="04_metrics-methods.html#time-slicing"><i class="fa fa-check"></i><b>4.3</b> Time Slicing<span></span></a></li>
+<li class="chapter" data-level="4.4" data-path="04_metrics-methods.html"><a href="04_metrics-methods.html#daily-climate-metrics"><i class="fa fa-check"></i><b>4.4</b> Daily Climate Metrics<span></span></a></li>
+<li class="chapter" data-level="4.5" data-path="04_metrics-methods.html"><a href="04_metrics-methods.html#diurnal-temperature-range"><i class="fa fa-check"></i><b>4.5</b> Diurnal Temperature Range<span></span></a></li>
+<li class="chapter" data-level="4.6" data-path="04_metrics-methods.html"><a href="04_metrics-methods.html#daily-threshhold-events"><i class="fa fa-check"></i><b>4.6</b> Daily Threshhold Events<span></span></a></li>
+<li class="chapter" data-level="4.7" data-path="04_metrics-methods.html"><a href="04_metrics-methods.html#counting-consecutive-events"><i class="fa fa-check"></i><b>4.7</b> Counting Consecutive Events<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html"><i class="fa fa-check"></i><b>5</b> AgroClimate Metrics<span></span></a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#load-packages-2"><i class="fa fa-check"></i><b>5.1</b> Load Packages<span></span></a></li>
+<li class="chapter" data-level="5.2" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#fetch-some-data-1"><i class="fa fa-check"></i><b>5.2</b> Fetch Some Data<span></span></a></li>
+<li class="chapter" data-level="5.3" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#growing-degree-days"><i class="fa fa-check"></i><b>5.3</b> Growing Degree Days<span></span></a></li>
+<li class="chapter" data-level="5.4" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#chill-accumulation"><i class="fa fa-check"></i><b>5.4</b> Chill Accumulation<span></span></a></li>
+<li class="chapter" data-level="5.5" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#frost-days"><i class="fa fa-check"></i><b>5.5</b> Frost Days<span></span></a></li>
+<li class="chapter" data-level="5.6" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#last-spring-and-first-fall-freeze"><i class="fa fa-check"></i><b>5.6</b> Last Spring and First Fall Freeze<span></span></a></li>
+<li class="chapter" data-level="5.7" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#freeze-free-season"><i class="fa fa-check"></i><b>5.7</b> Freeze-Free Season<span></span></a></li>
+<li class="chapter" data-level="5.8" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#tropical-nights-and-hot-days"><i class="fa fa-check"></i><b>5.8</b> Tropical Nights and Hot Days<span></span></a></li>
+<li class="chapter" data-level="5.9" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#extreme-heat-days"><i class="fa fa-check"></i><b>5.9</b> Extreme Heat Days<span></span></a></li>
+<li class="chapter" data-level="5.10" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#heatwaves"><i class="fa fa-check"></i><b>5.10</b> Heatwaves<span></span></a></li>
+<li class="chapter" data-level="5.11" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#diurnal-temperature-range-1"><i class="fa fa-check"></i><b>5.11</b> Diurnal Temperature Range<span></span></a></li>
+<li class="chapter" data-level="5.12" data-path="05_agroclimate-metrics.html"><a href="05_agroclimate-metrics.html#reference-evapotranspiration"><i class="fa fa-check"></i><b>5.12</b> Reference Evapotranspiration<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="06_degday.html"><a href="06_degday.html"><i class="fa fa-check"></i><b>6</b> Degree Days<span></span></a></li>
+<li class="chapter" data-level="7" data-path="07_joining-other-data.html"><a href="07_joining-other-data.html"><i class="fa fa-check"></i><b>7</b> Joining Other Tables<span></span></a></li>
+<li class="chapter" data-level="8" data-path="08_raster-analyses.html"><a href="08_raster-analyses.html"><i class="fa fa-check"></i><b>8</b> Raster Operations<span></span></a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="08_raster-analyses.html"><a href="08_raster-analyses.html#load-packages-3"><i class="fa fa-check"></i><b>8.1</b> Load Packages<span></span></a></li>
+<li class="chapter" data-level="8.2" data-path="08_raster-analyses.html"><a href="08_raster-analyses.html#fetch-tifs"><i class="fa fa-check"></i><b>8.2</b> Fetch TIFs<span></span></a></li>
+<li class="chapter" data-level="8.3" data-path="08_raster-analyses.html"><a href="08_raster-analyses.html#import-tifs-in-r"><i class="fa fa-check"></i><b>8.3</b> Import TIFs in R<span></span></a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="09_shiny.html"><a href="09_shiny.html"><i class="fa fa-check"></i><b>9</b> Shiny Apps<span></span></a></li>
+<li class="chapter" data-level="10" data-path="99_references.html"><a href="99_references.html"><i class="fa fa-check"></i><b>10</b> References<span></span></a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with Bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Cooking with Cal-Adapt Climate Data in R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="methods-for-computing-climate-metrics" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Methods for Computing Climate Metrics<a href="04_metrics-methods.html#methods-for-computing-climate-metrics" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In this Chapter, we’ll explore some data wrangling techniques that are commonly used in computing climate metrics.</p>
+<div id="load-packages-1" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> Load packages<a href="04_metrics-methods.html#load-packages-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>As usual, start by loading a bunch of packages into memory and specifying our package preferences for conflicting function names:</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="04_metrics-methods.html#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caladaptr)</span>
+<span id="cb69-2"><a href="04_metrics-methods.html#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(units)</span>
+<span id="cb69-3"><a href="04_metrics-methods.html#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb69-4"><a href="04_metrics-methods.html#cb69-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb69-5"><a href="04_metrics-methods.html#cb69-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb69-6"><a href="04_metrics-methods.html#cb69-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb69-7"><a href="04_metrics-methods.html#cb69-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code></pre></div>
+<p>Set conflicted preferences:</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="04_metrics-methods.html#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(conflicted)</span>
+<span id="cb70-2"><a href="04_metrics-methods.html#cb70-2" aria-hidden="true" tabindex="-1"></a><span class="fu">conflict_prefer</span>(<span class="st">&quot;filter&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb70-3"><a href="04_metrics-methods.html#cb70-3" aria-hidden="true" tabindex="-1"></a><span class="fu">conflict_prefer</span>(<span class="st">&quot;count&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb70-4"><a href="04_metrics-methods.html#cb70-4" aria-hidden="true" tabindex="-1"></a><span class="fu">conflict_prefer</span>(<span class="st">&quot;select&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p><br />
+</p>
+</div>
+<div id="fetch-some-sample-data" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> Fetch Some Sample Data<a href="04_metrics-methods.html#fetch-some-sample-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>For the examples in this chapter, we’ll work with late-century daily temperature data for a location near Bakersfield, CA in the southern San Joaquin Valley.</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="04_metrics-methods.html#cb71-1" aria-hidden="true" tabindex="-1"></a>bkrfld_cap <span class="ot">&lt;-</span> <span class="fu">ca_loc_pt</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">119.151062</span>, <span class="fl">35.261321</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb71-2"><a href="04_metrics-methods.html#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ca_gcm</span>(gcms[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">%&gt;%</span>                                 </span>
+<span id="cb71-3"><a href="04_metrics-methods.html#cb71-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ca_scenario</span>(<span class="fu">c</span>(<span class="st">&quot;rcp45&quot;</span>, <span class="st">&quot;rcp85&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb71-4"><a href="04_metrics-methods.html#cb71-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ca_period</span>(<span class="st">&quot;day&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb71-5"><a href="04_metrics-methods.html#cb71-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ca_years</span>(<span class="at">start =</span> <span class="dv">2070</span>, <span class="at">end =</span> <span class="dv">2099</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb71-6"><a href="04_metrics-methods.html#cb71-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ca_cvar</span>(<span class="fu">c</span>(<span class="st">&quot;tasmin&quot;</span>, <span class="st">&quot;tasmax&quot;</span>))</span>
+<span id="cb71-7"><a href="04_metrics-methods.html#cb71-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-8"><a href="04_metrics-methods.html#cb71-8" aria-hidden="true" tabindex="-1"></a>bkrfld_cap <span class="sc">%&gt;%</span> <span class="fu">ca_preflight</span>()</span></code></pre></div>
+<pre><code>## General issues
+##  - none found
+## Issues for querying values
+##  - none found
+## Issues for downloading rasters
+##  - none found</code></pre>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="04_metrics-methods.html#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bkrfld_cap)</span></code></pre></div>
+<div id="htmlwidget-2364ac45df3421074b25" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2364ac45df3421074b25">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"createMapPane","args":["tmap401",401]},{"method":"addProviderTiles","args":["Esri.NatGeoWorldMap",null,"Esri.NatGeoWorldMap",{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addCircleMarkers","args":[35.261321,-119.151062,8.94427190999916,"X1","Query Location(s)",{"interactive":true,"className":"","pane":"tmap401","stroke":true,"color":"#666666","weight":1,"opacity":0.5,"fill":true,"fillColor":"#FF0000","fillOpacity":0.8},null,null,"<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><b>1<\/b><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>id<\/nobr><\/td><td align=\"right\"><nobr>1<\/nobr><\/td><\/tr><\/table><\/div>",null,"1",{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLayersControl","args":[[],"Query Location(s)",{"collapsed":true,"autoZIndex":true,"position":"topleft"}]}],"limits":{"lat":[35.261321,35.261321],"lng":[-119.151062,-119.151062]},"fitBounds":[34.761321,-119.651062,35.761321,-118.651062,[]]},"evals":[],"jsHooks":[]}</script>
+<p><br />
+</p>
+<p>Fetch data:</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="04_metrics-methods.html#cb74-1" aria-hidden="true" tabindex="-1"></a>bkrfld_tbl <span class="ot">&lt;-</span> bkrfld_cap <span class="sc">%&gt;%</span> </span>
+<span id="cb74-2"><a href="04_metrics-methods.html#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ca_getvals_tbl</span>(<span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb74-3"><a href="04_metrics-methods.html#cb74-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dt =</span> <span class="fu">as.Date</span>(dt),</span>
+<span id="cb74-4"><a href="04_metrics-methods.html#cb74-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">temp_f =</span> units<span class="sc">::</span><span class="fu">set_units</span>(val, degF))</span>
+<span id="cb74-5"><a href="04_metrics-methods.html#cb74-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-6"><a href="04_metrics-methods.html#cb74-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(bkrfld_tbl)</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 9
+##      id cvar   period gcm        scenario spag  dt          val temp_f
+##   &lt;int&gt; &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt;      &lt;fct&gt;    &lt;fct&gt; &lt;date&gt;      [K] [degF]
+## 1     1 tasmin day    HadGEM2-ES rcp45    none  2070-01-01 278.   41.1
+## 2     1 tasmin day    HadGEM2-ES rcp45    none  2070-01-02 278.   40.6
+## 3     1 tasmin day    HadGEM2-ES rcp45    none  2070-01-03 284.   51.7
+## 4     1 tasmin day    HadGEM2-ES rcp45    none  2070-01-04 276.   37.6
+## 5     1 tasmin day    HadGEM2-ES rcp45    none  2070-01-05 280.   45.0
+## 6     1 tasmin day    HadGEM2-ES rcp45    none  2070-01-06 280.   44.5</code></pre>
+<p><br />
+</p>
+</div>
+<div id="time-slicing" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> Time Slicing<a href="04_metrics-methods.html#time-slicing" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Often an analysis requires you to slice climate data into specific periods that are meaningful for a specific study. For example, <a href="https://en.wikipedia.org/wiki/Water_year">water years</a> start on October 1 and run through the following season. Or you might just be interested in the winter months, when tree crops or bugs are particularly sensitive to temperatures. In this section, we’ll look at different techniques for time-slicing climate data.</p>
+<p>The general approach is to add a column in the table that identifies the time slice. (If you’re working with rasters, the idea is similar but you add an attribute value to the layer). Once you have the time-slice identifiers in your table, you can easily filter or group on that column to compute summaries for each time-slice.</p>
+<p><code>lubridate</code> is your ally when it comes to extracting date parts. For example to add columns for date parts like year, month, week, and ordinal date, we can use the standard <code>mutate()</code> with date part functions from lubridate:</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="04_metrics-methods.html#cb76-1" aria-hidden="true" tabindex="-1"></a>bkrfld_dtprts_tbl <span class="ot">&lt;-</span> bkrfld_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb76-2"><a href="04_metrics-methods.html#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(dt),</span>
+<span id="cb76-3"><a href="04_metrics-methods.html#cb76-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">month =</span> lubridate<span class="sc">::</span><span class="fu">month</span>(dt),</span>
+<span id="cb76-4"><a href="04_metrics-methods.html#cb76-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">week =</span> lubridate<span class="sc">::</span><span class="fu">week</span>(dt),</span>
+<span id="cb76-5"><a href="04_metrics-methods.html#cb76-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">yday =</span> lubridate<span class="sc">::</span><span class="fu">yday</span>(dt)) <span class="sc">%&gt;%</span> </span>
+<span id="cb76-6"><a href="04_metrics-methods.html#cb76-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(dt, year, month, week, yday, cvar, gcm, scenario, temp_f)</span>
+<span id="cb76-7"><a href="04_metrics-methods.html#cb76-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-8"><a href="04_metrics-methods.html#cb76-8" aria-hidden="true" tabindex="-1"></a>bkrfld_dtprts_tbl <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 20 x 9
+##    dt          year month  week  yday cvar   gcm        scenario temp_f
+##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;  &lt;fct&gt;      &lt;fct&gt;    [degF]
+##  1 2070-01-01  2070     1     1     1 tasmin HadGEM2-ES rcp45      41.1
+##  2 2070-01-02  2070     1     1     2 tasmin HadGEM2-ES rcp45      40.6
+##  3 2070-01-03  2070     1     1     3 tasmin HadGEM2-ES rcp45      51.7
+##  4 2070-01-04  2070     1     1     4 tasmin HadGEM2-ES rcp45      37.6
+##  5 2070-01-05  2070     1     1     5 tasmin HadGEM2-ES rcp45      45.0
+##  6 2070-01-06  2070     1     1     6 tasmin HadGEM2-ES rcp45      44.5
+##  7 2070-01-07  2070     1     1     7 tasmin HadGEM2-ES rcp45      40.9
+##  8 2070-01-08  2070     1     2     8 tasmin HadGEM2-ES rcp45      47.7
+##  9 2070-01-09  2070     1     2     9 tasmin HadGEM2-ES rcp45      50.5
+## 10 2070-01-10  2070     1     2    10 tasmin HadGEM2-ES rcp45      46.7
+## 11 2070-01-11  2070     1     2    11 tasmin HadGEM2-ES rcp45      39.8
+## 12 2070-01-12  2070     1     2    12 tasmin HadGEM2-ES rcp45      42.9
+## 13 2070-01-13  2070     1     2    13 tasmin HadGEM2-ES rcp45      35.5
+## 14 2070-01-14  2070     1     2    14 tasmin HadGEM2-ES rcp45      34.1
+## 15 2070-01-15  2070     1     3    15 tasmin HadGEM2-ES rcp45      39.4
+## 16 2070-01-16  2070     1     3    16 tasmin HadGEM2-ES rcp45      43.3
+## 17 2070-01-17  2070     1     3    17 tasmin HadGEM2-ES rcp45      44.3
+## 18 2070-01-18  2070     1     3    18 tasmin HadGEM2-ES rcp45      45.5
+## 19 2070-01-19  2070     1     3    19 tasmin HadGEM2-ES rcp45      49.5
+## 20 2070-01-20  2070     1     3    20 tasmin HadGEM2-ES rcp45      44.8</code></pre>
+<p><br />
+</p>
+<p>To plot the distribution of winter time daily minimum temperatures (i.e., to identify frost days), we could use the month column to get only dates in December, January, and February:</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="04_metrics-methods.html#cb78-1" aria-hidden="true" tabindex="-1"></a>bkrfld_wintrmth_lows_tbl <span class="ot">&lt;-</span> bkrfld_dtprts_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb78-2"><a href="04_metrics-methods.html#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(cvar <span class="sc">==</span> <span class="st">&quot;tasmin&quot;</span>, month <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb78-3"><a href="04_metrics-methods.html#cb78-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb78-4"><a href="04_metrics-methods.html#cb78-4" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(bkrfld_wintrmth_lows_tbl<span class="sc">$</span>month)</span></code></pre></div>
+<pre><code>## 
+##    1    2   12 
+## 7440 6776 7440</code></pre>
+<p><br />
+</p>
+<p>Plot histogram:</p>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="04_metrics-methods.html#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bkrfld_wintrmth_lows_tbl, <span class="fu">aes</span>(<span class="at">x=</span>temp_f)) <span class="sc">+</span> </span>
+<span id="cb80-2"><a href="04_metrics-methods.html#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
+<span id="cb80-3"><a href="04_metrics-methods.html#cb80-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(scenario <span class="sc">~</span> .) <span class="sc">+</span></span>
+<span id="cb80-4"><a href="04_metrics-methods.html#cb80-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Distribution of Winter Nightime Lows, 2070-2099&quot;</span>,</span>
+<span id="cb80-5"><a href="04_metrics-methods.html#cb80-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Bakersfield, CA&quot;</span>,</span>
+<span id="cb80-6"><a href="04_metrics-methods.html#cb80-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="fu">paste0</span>(<span class="st">&quot;GCMs: &quot;</span>, <span class="fu">paste</span>(gcms[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>), <span class="st">&quot;. Months: Dec, Jan, and Feb.&quot;</span>),</span>
+<span id="cb80-7"><a href="04_metrics-methods.html#cb80-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;night time low (F)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;count&quot;</span>)</span></code></pre></div>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="cookbook_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>If we want use the standard definition of the winter season, we could alternately filter winter days by their ordinal date number (aka Julian date). Winter starts on December 21 (day 355 of non-leap years) and ends on March 20 (day 79).</p>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="04_metrics-methods.html#cb82-1" aria-hidden="true" tabindex="-1"></a>bkrfld_wintrssn_tbl <span class="ot">&lt;-</span> bkrfld_dtprts_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb82-2"><a href="04_metrics-methods.html#cb82-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(cvar <span class="sc">==</span> <span class="st">&quot;tasmin&quot;</span>, yday <span class="sc">&gt;=</span> <span class="dv">355</span> <span class="sc">|</span> yday <span class="sc">&lt;=</span> <span class="dv">79</span>)</span>
+<span id="cb82-3"><a href="04_metrics-methods.html#cb82-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb82-4"><a href="04_metrics-methods.html#cb82-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bkrfld_wintrssn_tbl, <span class="fu">aes</span>(<span class="at">x=</span>temp_f)) <span class="sc">+</span> </span>
+<span id="cb82-5"><a href="04_metrics-methods.html#cb82-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
+<span id="cb82-6"><a href="04_metrics-methods.html#cb82-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(scenario <span class="sc">~</span> .) <span class="sc">+</span></span>
+<span id="cb82-7"><a href="04_metrics-methods.html#cb82-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Distribution of Winter Nightime Lows, 2070-2099&quot;</span>,</span>
+<span id="cb82-8"><a href="04_metrics-methods.html#cb82-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Bakersfield, CA&quot;</span>,</span>
+<span id="cb82-9"><a href="04_metrics-methods.html#cb82-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="fu">paste0</span>(<span class="st">&quot;GCMs: &quot;</span>, <span class="fu">paste</span>(gcms[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>), <span class="st">&quot;. December 21 - March 20.&quot;</span>),</span>
+<span id="cb82-10"><a href="04_metrics-methods.html#cb82-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;night time low (F)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;count&quot;</span>)</span></code></pre></div>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="cookbook_files/figure-html/bkrfld_winter_seasn_tbl-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Time slices can also be used for grouping. The following expression computes the average nightly low for the summer months for each RCP (all GCMs and years combined):</p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="04_metrics-methods.html#cb84-1" aria-hidden="true" tabindex="-1"></a>bkrfld_dtprts_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb84-2"><a href="04_metrics-methods.html#cb84-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(month <span class="sc">%in%</span> <span class="dv">6</span><span class="sc">:</span><span class="dv">8</span>, cvar <span class="sc">==</span> <span class="st">&quot;tasmin&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb84-3"><a href="04_metrics-methods.html#cb84-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(month, scenario) <span class="sc">%&gt;%</span> </span>
+<span id="cb84-4"><a href="04_metrics-methods.html#cb84-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg_temp =</span> <span class="fu">mean</span>(temp_f), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb84-5"><a href="04_metrics-methods.html#cb84-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month =</span> month.name[month]) <span class="sc">%&gt;%</span> </span>
+<span id="cb84-6"><a href="04_metrics-methods.html#cb84-6" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> month, <span class="at">names_from =</span> scenario, <span class="at">values_from =</span> avg_temp)</span></code></pre></div>
+<pre><code>## # A tibble: 3 x 3
+##   month   rcp45  rcp85
+##   &lt;chr&gt;  [degF] [degF]
+## 1 June     68.1   71.5
+## 2 July     74.1   78.0
+## 3 August   73.8   77.8</code></pre>
+<p><br />
+</p>
+<p>Sometimes the time period of interest spans two calendar years. A <a href="https://en.wikipedia.org/wiki/Water_year" target="_blank" rel="noopener">water year</a> for example starts on October 1 and goes thru the end of September the following year. Some agricultural periods (such as winter dormancy) may also start in the fall and continue into the new year.</p>
+<p>Slicing your data by a time period that spans calendar years is done in the same manner - you add a column to the table for period identifier. Below we add a column for water year (which conventionally are designated by the calendar year in which it ends):</p>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="04_metrics-methods.html#cb86-1" aria-hidden="true" tabindex="-1"></a>bkrfld_wtryr_tbl <span class="ot">&lt;-</span> bkrfld_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb86-2"><a href="04_metrics-methods.html#cb86-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">water_yr =</span> <span class="fu">year</span>(dt) <span class="sc">+</span> <span class="fu">if_else</span>(<span class="fu">month</span>(dt) <span class="sc">&gt;=</span> <span class="dv">10</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb86-3"><a href="04_metrics-methods.html#cb86-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(dt, water_yr, cvar, gcm, scenario, temp_f)</span>
+<span id="cb86-4"><a href="04_metrics-methods.html#cb86-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-5"><a href="04_metrics-methods.html#cb86-5" aria-hidden="true" tabindex="-1"></a>bkrfld_wtryr_tbl <span class="sc">%&gt;%</span> <span class="fu">sample_n</span>(<span class="dv">10</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 10 x 6
+##    dt         water_yr cvar   gcm        scenario temp_f
+##    &lt;date&gt;        &lt;dbl&gt; &lt;fct&gt;  &lt;fct&gt;      &lt;fct&gt;    [degF]
+##  1 2089-12-08     2090 tasmax CNRM-CM5   rcp45      63.6
+##  2 2086-10-29     2087 tasmin MIROC5     rcp85      55.7
+##  3 2076-10-05     2077 tasmin CNRM-CM5   rcp85      52.3
+##  4 2085-08-15     2085 tasmin HadGEM2-ES rcp45      69.1
+##  5 2074-10-15     2075 tasmax CNRM-CM5   rcp45      95.7
+##  6 2097-07-18     2097 tasmax CNRM-CM5   rcp45      94.6
+##  7 2073-03-08     2073 tasmin MIROC5     rcp45      46.2
+##  8 2092-05-29     2092 tasmin MIROC5     rcp85      69.4
+##  9 2095-07-28     2095 tasmax MIROC5     rcp45      96.0
+## 10 2093-10-04     2094 tasmin MIROC5     rcp85      58.8</code></pre>
+<p><br />
+</p>
+</div>
+<div id="daily-climate-metrics" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> Daily Climate Metrics<a href="04_metrics-methods.html#daily-climate-metrics" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Many climate analyses require metrics computed on a daily time scale. For example, to see how frost exposure might change over time, we may have to look at the lowest daily temperature. This presents a small conundrum, because climate models are not weather forecasts, and best practices tell us that we don’t look at less than 30 years. But it would be silly to average the daily low temperatures by month or year and use that as a proxy for frost exposure.</p>
+<p>The general approach in these cases is compute the daily metrics as if you were dealing with observed data, but then to aggregate the metrics over bigger periods of time and space. For example, you could classify each individual day in frost / non-frost, and then count the number of predicted frost days over a 30-year interval.</p>
+</div>
+<div id="diurnal-temperature-range" class="section level2 hasAnchor" number="4.5">
+<h2><span class="header-section-number">4.5</span> Diurnal Temperature Range<a href="04_metrics-methods.html#diurnal-temperature-range" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Diurnal Temperature Range (DTR) is the difference between daily min and max temperature <span class="citation">(<a href="99_references.html#ref-parker_observed_2022" role="doc-biblioref">Parker et al. 2022</a>)</span>. The magnitude of DTR can impact wine grape development and taste. In the example below, we calculate DTR from November thru February.</p>
+<p>The first step is to separate the minimum and maximum daily temperatures into separate columns:</p>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="04_metrics-methods.html#cb88-1" aria-hidden="true" tabindex="-1"></a>bkrfld_wide_tbl <span class="ot">&lt;-</span> bkrfld_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb88-2"><a href="04_metrics-methods.html#cb88-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">month</span>(dt) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">11</span>,<span class="dv">12</span>,<span class="dv">1</span>,<span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb88-3"><a href="04_metrics-methods.html#cb88-3" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> <span class="fu">c</span>(dt, gcm, scenario), <span class="at">names_from =</span> cvar, <span class="at">values_from =</span> temp_f)</span>
+<span id="cb88-4"><a href="04_metrics-methods.html#cb88-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-5"><a href="04_metrics-methods.html#cb88-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(bkrfld_wide_tbl)</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 5
+##   dt         gcm        scenario tasmin tasmax
+##   &lt;date&gt;     &lt;fct&gt;      &lt;fct&gt;    [degF] [degF]
+## 1 2070-01-01 HadGEM2-ES rcp45      41.1   67.2
+## 2 2070-01-02 HadGEM2-ES rcp45      40.6   63.2
+## 3 2070-01-03 HadGEM2-ES rcp45      51.7   67.0
+## 4 2070-01-04 HadGEM2-ES rcp45      37.6   53.9
+## 5 2070-01-05 HadGEM2-ES rcp45      45.0   54.8
+## 6 2070-01-06 HadGEM2-ES rcp45      44.5   57.9</code></pre>
+<p>Now we can compute DTR:</p>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="04_metrics-methods.html#cb90-1" aria-hidden="true" tabindex="-1"></a>bkrfld_dtr_tbl <span class="ot">&lt;-</span> bkrfld_wide_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb90-2"><a href="04_metrics-methods.html#cb90-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dtr =</span> tasmax <span class="sc">-</span> tasmin)</span>
+<span id="cb90-3"><a href="04_metrics-methods.html#cb90-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-4"><a href="04_metrics-methods.html#cb90-4" aria-hidden="true" tabindex="-1"></a>bkrfld_dtr_tbl <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 6
+##   dt         gcm        scenario tasmin tasmax    dtr
+##   &lt;date&gt;     &lt;fct&gt;      &lt;fct&gt;    [degF] [degF] [degF]
+## 1 2070-01-01 HadGEM2-ES rcp45      41.1   67.2  26.1 
+## 2 2070-01-02 HadGEM2-ES rcp45      40.6   63.2  22.7 
+## 3 2070-01-03 HadGEM2-ES rcp45      51.7   67.0  15.3 
+## 4 2070-01-04 HadGEM2-ES rcp45      37.6   53.9  16.3 
+## 5 2070-01-05 HadGEM2-ES rcp45      45.0   54.8   9.85
+## 6 2070-01-06 HadGEM2-ES rcp45      44.5   57.9  13.4</code></pre>
+<p><br />
+</p>
+<p>We can show the results with a box plot:</p>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="04_metrics-methods.html#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bkrfld_dtr_tbl, <span class="fu">aes</span>(<span class="at">x=</span>scenario, <span class="at">y =</span> dtr)) <span class="sc">+</span> </span>
+<span id="cb92-2"><a href="04_metrics-methods.html#cb92-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span> </span>
+<span id="cb92-3"><a href="04_metrics-methods.html#cb92-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Diurnal Temperature Range, 2070-2099&quot;</span>,</span>
+<span id="cb92-4"><a href="04_metrics-methods.html#cb92-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">&quot;Bakersfield, CA&quot;</span>, </span>
+<span id="cb92-5"><a href="04_metrics-methods.html#cb92-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="fu">paste0</span>(<span class="st">&quot;GCMs: &quot;</span>, <span class="fu">paste</span>(gcms[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>), <span class="st">&quot;. Temporal period: Nov-Feb.&quot;</span>),</span>
+<span id="cb92-6"><a href="04_metrics-methods.html#cb92-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">&quot;Emission scenarios&quot;</span>, <span class="at">y =</span> <span class="st">&quot;diurnal temperature range&quot;</span>)</span></code></pre></div>
+<p><img src="cookbook_files/figure-html/ggplot_bkrfld_dtr_tbl-1.png" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="daily-threshhold-events" class="section level2 hasAnchor" number="4.6">
+<h2><span class="header-section-number">4.6</span> Daily Threshhold Events<a href="04_metrics-methods.html#daily-threshhold-events" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Many climate analyses involve a threshold event, such as temperature above or below a certain value. These tend to be easy to compute using an expression that returns TRUE or FALSE. Subsequently, you can count the number of threshold events using sum() (when you sum logical values TRUEs become 1 and FALSE becomes 0).</p>
+<p>Below we compute the number of ‘Hot Days’ per year, where a Hot Day is defined as the maximum temperature over 38 °C (100.4 °F) <span class="citation">(<a href="99_references.html#ref-parker_observed_2022" role="doc-biblioref">Parker et al. 2022</a>)</span>. We need to keep gcm and scenario as we’ll be grouping on those columns next.</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="04_metrics-methods.html#cb93-1" aria-hidden="true" tabindex="-1"></a>bkrfld_hotday_tbl <span class="ot">&lt;-</span> bkrfld_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb93-2"><a href="04_metrics-methods.html#cb93-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(cvar <span class="sc">==</span> <span class="st">&quot;tasmax&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-3"><a href="04_metrics-methods.html#cb93-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hotday_yn =</span> temp_f <span class="sc">&gt;=</span> units<span class="sc">::</span><span class="fu">set_units</span>(<span class="dv">38</span>, degC),</span>
+<span id="cb93-4"><a href="04_metrics-methods.html#cb93-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">year =</span> <span class="fu">year</span>(dt)) <span class="sc">%&gt;%</span> </span>
+<span id="cb93-5"><a href="04_metrics-methods.html#cb93-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(dt, year, cvar, scenario, gcm, temp_f, hotday_yn)</span>
+<span id="cb93-6"><a href="04_metrics-methods.html#cb93-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-7"><a href="04_metrics-methods.html#cb93-7" aria-hidden="true" tabindex="-1"></a>bkrfld_hotday_tbl <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 7
+##   dt          year cvar   scenario gcm        temp_f hotday_yn
+##   &lt;date&gt;     &lt;dbl&gt; &lt;fct&gt;  &lt;fct&gt;    &lt;fct&gt;      [degF] &lt;lgl&gt;    
+## 1 2070-01-01  2070 tasmax rcp45    HadGEM2-ES   67.2 FALSE    
+## 2 2070-01-02  2070 tasmax rcp45    HadGEM2-ES   63.2 FALSE    
+## 3 2070-01-03  2070 tasmax rcp45    HadGEM2-ES   67.0 FALSE    
+## 4 2070-01-04  2070 tasmax rcp45    HadGEM2-ES   53.9 FALSE    
+## 5 2070-01-05  2070 tasmax rcp45    HadGEM2-ES   54.8 FALSE    
+## 6 2070-01-06  2070 tasmax rcp45    HadGEM2-ES   57.9 FALSE</code></pre>
+<p><br />
+</p>
+<p>Now we can group by year and scenario to compare how the average number of hot days per year looks for each RCP.</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="04_metrics-methods.html#cb95-1" aria-hidden="true" tabindex="-1"></a>bkrfld_numhd_tbl <span class="ot">&lt;-</span> bkrfld_hotday_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb95-2"><a href="04_metrics-methods.html#cb95-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, scenario, gcm) <span class="sc">%&gt;%</span> </span>
+<span id="cb95-3"><a href="04_metrics-methods.html#cb95-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">num_hotday =</span> <span class="fu">sum</span>(hotday_yn))</span></code></pre></div>
+<pre><code>## `summarise()` has grouped output by &#39;year&#39;, &#39;scenario&#39;. You can override using
+## the `.groups` argument.</code></pre>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="04_metrics-methods.html#cb97-1" aria-hidden="true" tabindex="-1"></a>bkrfld_numhd_tbl <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 4
+## # Groups:   year, scenario [2]
+##    year scenario gcm        num_hotday
+##   &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;           &lt;int&gt;
+## 1  2070 rcp45    CanESM2            75
+## 2  2070 rcp45    CNRM-CM5           58
+## 3  2070 rcp45    HadGEM2-ES         91
+## 4  2070 rcp45    MIROC5             70
+## 5  2070 rcp85    CanESM2            88
+## 6  2070 rcp85    CNRM-CM5           68</code></pre>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="04_metrics-methods.html#cb99-1" aria-hidden="true" tabindex="-1"></a>bkrfld_numhd_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb99-2"><a href="04_metrics-methods.html#cb99-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, scenario) <span class="sc">%&gt;%</span> </span>
+<span id="cb99-3"><a href="04_metrics-methods.html#cb99-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_hd =</span> <span class="fu">mean</span>(num_hotday), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb99-4"><a href="04_metrics-methods.html#cb99-4" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> year, <span class="at">names_from =</span> scenario, <span class="at">values_from =</span> avg_hd)</span></code></pre></div>
+<pre><code>## # A tibble: 30 x 3
+##     year rcp45 rcp85
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1  2070  73.5  87.5
+##  2  2071  73.2  83  
+##  3  2072  75    83.5
+##  4  2073  77.5  94.2
+##  5  2074  83.5  88.5
+##  6  2075  77.5  79  
+##  7  2076  71    87  
+##  8  2077  65.2  98.2
+##  9  2078  70.2  94.8
+## 10  2079  82   102  
+## # ... with 20 more rows</code></pre>
+<p>Sometimes you want to know the number of threshold events during a particular time of the year. For example tree crops are particularly susceptible to frost damage right after they’ve bloomed.</p>
+<p>Let’s compute the <strong>number of hot days in June, July and August</strong>, which can be particularly bad for nut development. Because we have daily data from 4 GCMs, we have to count the number of hot days for each GCM, and then average those together for each emissions scenario.</p>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="04_metrics-methods.html#cb101-1" aria-hidden="true" tabindex="-1"></a>bkrfld_sumrhd_tbl <span class="ot">&lt;-</span> bkrfld_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb101-2"><a href="04_metrics-methods.html#cb101-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(cvar <span class="sc">==</span> <span class="st">&quot;tasmax&quot;</span>, <span class="fu">month</span>(dt) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb101-3"><a href="04_metrics-methods.html#cb101-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hd =</span> temp_f <span class="sc">&gt;=</span> units<span class="sc">::</span><span class="fu">set_units</span>(<span class="dv">38</span>, degC),</span>
+<span id="cb101-4"><a href="04_metrics-methods.html#cb101-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">year =</span> <span class="fu">year</span>(dt)) <span class="sc">%&gt;%</span> </span>
+<span id="cb101-5"><a href="04_metrics-methods.html#cb101-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(dt, year, cvar, scenario, gcm, temp_f, hd)</span>
+<span id="cb101-6"><a href="04_metrics-methods.html#cb101-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb101-7"><a href="04_metrics-methods.html#cb101-7" aria-hidden="true" tabindex="-1"></a>bkrfld_sumrhd_tbl <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 7
+##   dt          year cvar   scenario gcm        temp_f hd   
+##   &lt;date&gt;     &lt;dbl&gt; &lt;fct&gt;  &lt;fct&gt;    &lt;fct&gt;      [degF] &lt;lgl&gt;
+## 1 2070-06-01  2070 tasmax rcp45    HadGEM2-ES   79.8 FALSE
+## 2 2070-06-02  2070 tasmax rcp45    HadGEM2-ES   77.7 FALSE
+## 3 2070-06-03  2070 tasmax rcp45    HadGEM2-ES   74.7 FALSE
+## 4 2070-06-04  2070 tasmax rcp45    HadGEM2-ES   80.6 FALSE
+## 5 2070-06-05  2070 tasmax rcp45    HadGEM2-ES   86.3 FALSE
+## 6 2070-06-06  2070 tasmax rcp45    HadGEM2-ES   92.9 FALSE</code></pre>
+<p><br />
+</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="04_metrics-methods.html#cb103-1" aria-hidden="true" tabindex="-1"></a>bkrfld_numsumrhd_tbl <span class="ot">&lt;-</span> bkrfld_sumrhd_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb103-2"><a href="04_metrics-methods.html#cb103-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, scenario, gcm) <span class="sc">%&gt;%</span> </span>
+<span id="cb103-3"><a href="04_metrics-methods.html#cb103-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">num_sumrhd =</span> <span class="fu">sum</span>(hd), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>) </span>
+<span id="cb103-4"><a href="04_metrics-methods.html#cb103-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-5"><a href="04_metrics-methods.html#cb103-5" aria-hidden="true" tabindex="-1"></a>bkrfld_numsumrhd_tbl <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 4
+##    year scenario gcm        num_sumrhd
+##   &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;           &lt;int&gt;
+## 1  2070 rcp45    CanESM2            64
+## 2  2070 rcp45    CNRM-CM5           43
+## 3  2070 rcp45    HadGEM2-ES         71
+## 4  2070 rcp45    MIROC5             55
+## 5  2070 rcp85    CanESM2            69
+## 6  2070 rcp85    CNRM-CM5           55</code></pre>
+<p><br />
+</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="04_metrics-methods.html#cb105-1" aria-hidden="true" tabindex="-1"></a>bkrfld_avgnumsumrhd_tbl <span class="ot">&lt;-</span> bkrfld_numsumrhd_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb105-2"><a href="04_metrics-methods.html#cb105-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, scenario) <span class="sc">%&gt;%</span> </span>
+<span id="cb105-3"><a href="04_metrics-methods.html#cb105-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg_num_sumrhd =</span> <span class="fu">mean</span>(num_sumrhd), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span>
+<span id="cb105-4"><a href="04_metrics-methods.html#cb105-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-5"><a href="04_metrics-methods.html#cb105-5" aria-hidden="true" tabindex="-1"></a>bkrfld_avgnumsumrhd_tbl <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 3
+##    year scenario avg_num_sumrhd
+##   &lt;dbl&gt; &lt;fct&gt;             &lt;dbl&gt;
+## 1  2070 rcp45              58.2
+## 2  2070 rcp85              66.5
+## 3  2071 rcp45              56.8
+## 4  2071 rcp85              59  
+## 5  2072 rcp45              60.5
+## 6  2072 rcp85              62.2</code></pre>
+<p><br />
+</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="04_metrics-methods.html#cb107-1" aria-hidden="true" tabindex="-1"></a>bkrfld_avgnumsumrhd_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb107-2"><a href="04_metrics-methods.html#cb107-2" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> year, <span class="at">names_from =</span> scenario, <span class="at">values_from =</span> avg_num_sumrhd)</span></code></pre></div>
+<pre><code>## # A tibble: 30 x 3
+##     year rcp45 rcp85
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1  2070  58.2  66.5
+##  2  2071  56.8  59  
+##  3  2072  60.5  62.2
+##  4  2073  65    72  
+##  5  2074  63.5  69.2
+##  6  2075  59.8  55.2
+##  7  2076  56.5  70  
+##  8  2077  54    70  
+##  9  2078  59    72.5
+## 10  2079  59.8  74.2
+## # ... with 20 more rows</code></pre>
+<p><br />
+</p>
+</div>
+<div id="counting-consecutive-events" class="section level2 hasAnchor" number="4.7">
+<h2><span class="header-section-number">4.7</span> Counting Consecutive Events<a href="04_metrics-methods.html#counting-consecutive-events" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>“Heat spells,” “cold spells,” and “extreme precipitation” events are all defined as consecutive days of a threshold event. The number of consecutive days may vary, but the general technique for identifying ‘spells’ is</p>
+<ol style="list-style-type: decimal">
+<li><p>Run an expression that tests whether the threshhold was passed for each day, returning a series TRUE or FALSE values.</p></li>
+<li><p>Pass the TRUE / FALSE values into the rle(), which identifies ‘runs’ of TRUE and FALSE values</p></li>
+<li><p>Count the number of runs that meet the minimum duration</p></li>
+</ol>
+<p>To illustrate this, take the following series of 30 temperature values. We’ll compute the number of heat spells where the temperature was 100 or more for three or more days in a row:</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="04_metrics-methods.html#cb109-1" aria-hidden="true" tabindex="-1"></a>x_temp <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">96</span>,<span class="dv">97</span>,<span class="dv">101</span>,<span class="dv">98</span>,<span class="dv">100</span>,<span class="dv">102</span>,<span class="dv">101</span>,<span class="dv">99</span>,<span class="dv">94</span>,<span class="dv">89</span>,<span class="dv">97</span>,<span class="dv">102</span>,<span class="dv">104</span>,<span class="dv">101</span>,<span class="dv">103</span>,<span class="dv">99</span>,<span class="dv">92</span>,<span class="dv">94</span>,<span class="dv">88</span>,<span class="dv">90</span>,<span class="dv">98</span>,<span class="dv">101</span>,<span class="dv">99</span>,<span class="dv">103</span>,<span class="dv">104</span>,<span class="dv">102</span>,<span class="dv">98</span>,<span class="dv">97</span>,<span class="dv">98</span>,<span class="dv">99</span>)</span></code></pre></div>
+<p>Step 1 is to check to see if each value exceeds the threshold):</p>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="04_metrics-methods.html#cb110-1" aria-hidden="true" tabindex="-1"></a>x_hot <span class="ot">&lt;-</span> x_temp <span class="sc">&gt;=</span> <span class="dv">100</span></span>
+<span id="cb110-2"><a href="04_metrics-methods.html#cb110-2" aria-hidden="true" tabindex="-1"></a>x_hot</span></code></pre></div>
+<pre><code>##  [1] FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE
+## [13]  TRUE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE
+## [25]  TRUE  TRUE FALSE FALSE FALSE FALSE</code></pre>
+<p>Next, feed the 30 TRUE/FALSE values into <code>rle()</code> (run-length encoding):</p>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="04_metrics-methods.html#cb112-1" aria-hidden="true" tabindex="-1"></a>rle_lst <span class="ot">&lt;-</span> <span class="fu">rle</span>(x_hot)</span>
+<span id="cb112-2"><a href="04_metrics-methods.html#cb112-2" aria-hidden="true" tabindex="-1"></a>rle_lst</span></code></pre></div>
+<pre><code>## Run Length Encoding
+##   lengths: int [1:11] 2 1 1 3 4 4 6 1 1 3 ...
+##   values : logi [1:11] FALSE TRUE FALSE TRUE FALSE TRUE ...</code></pre>
+<p><code>rle()</code> returns a list with two elements. Both elements are vectors of the same length. The <code>lengths</code> element contains the number of contiguous identical elements found in a ‘run’ in the original data. The <code>values</code> element contains the corresponding value of the run (in this case TRUE/FALSE values. Using this info, we can see our original data started with two FALSE values, followed by one TRUE value, followed by one FALSE value, followed by three TRUE values, and so on.</p>
+<p>To count the number of ‘TRUE’ runs (aka spells) equal to or longer than <em>n</em> days, we can apply a simple expression:</p>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="04_metrics-methods.html#cb114-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(rle_lst<span class="sc">$</span>values <span class="sc">&amp;</span> rle_lst<span class="sc">$</span>lengths <span class="sc">&gt;=</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<p><br />
+</p>
+<p>Using these techniques, below we compute the number of heat spells where the temperature was 100 °F or more for three or more days in a row:</p>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="04_metrics-methods.html#cb116-1" aria-hidden="true" tabindex="-1"></a>bkrfld_sumrhd_tbl <span class="ot">&lt;-</span> bkrfld_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb116-2"><a href="04_metrics-methods.html#cb116-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(cvar <span class="sc">==</span> <span class="st">&quot;tasmax&quot;</span>, <span class="fu">month</span>(dt) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb116-3"><a href="04_metrics-methods.html#cb116-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hd =</span> temp_f <span class="sc">&gt;=</span> units<span class="sc">::</span><span class="fu">set_units</span>(<span class="dv">38</span>, degC),</span>
+<span id="cb116-4"><a href="04_metrics-methods.html#cb116-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">year =</span> <span class="fu">year</span>(dt)) <span class="sc">%&gt;%</span> </span>
+<span id="cb116-5"><a href="04_metrics-methods.html#cb116-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(dt, year, cvar, scenario, gcm, temp_f, hd)</span>
+<span id="cb116-6"><a href="04_metrics-methods.html#cb116-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb116-7"><a href="04_metrics-methods.html#cb116-7" aria-hidden="true" tabindex="-1"></a>bkrfld_sumrhd_tbl <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 7
+##   dt          year cvar   scenario gcm        temp_f hd   
+##   &lt;date&gt;     &lt;dbl&gt; &lt;fct&gt;  &lt;fct&gt;    &lt;fct&gt;      [degF] &lt;lgl&gt;
+## 1 2070-06-01  2070 tasmax rcp45    HadGEM2-ES   79.8 FALSE
+## 2 2070-06-02  2070 tasmax rcp45    HadGEM2-ES   77.7 FALSE
+## 3 2070-06-03  2070 tasmax rcp45    HadGEM2-ES   74.7 FALSE
+## 4 2070-06-04  2070 tasmax rcp45    HadGEM2-ES   80.6 FALSE
+## 5 2070-06-05  2070 tasmax rcp45    HadGEM2-ES   86.3 FALSE
+## 6 2070-06-06  2070 tasmax rcp45    HadGEM2-ES   92.9 FALSE</code></pre>
+<p>We have to be a little creative to apply <code>rle()</code> in a data frame that has many time series in it (e.g., multiple years, GCMs, and emission scenarios). Each of the series needs to be fed into <code>rle()</code> individually, and the list returned by rle() will have different lengths. But what we can do is set up a list structure to store the results of <code>rle()</code>.</p>
+<p>First, we create a grouped tibble. A group tibble is still a tibble, but also has groups of rows invisibly defined. As we shall see shortly, other functions know what to do with those groups.</p>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="04_metrics-methods.html#cb118-1" aria-hidden="true" tabindex="-1"></a>bkrfld_grps_tbl <span class="ot">&lt;-</span> bkrfld_sumrhd_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb118-2"><a href="04_metrics-methods.html#cb118-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, scenario, gcm) <span class="sc">%&gt;%</span> </span>
+<span id="cb118-3"><a href="04_metrics-methods.html#cb118-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(dt)</span>
+<span id="cb118-4"><a href="04_metrics-methods.html#cb118-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb118-5"><a href="04_metrics-methods.html#cb118-5" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(bkrfld_grps_tbl)</span></code></pre></div>
+<pre><code>## Rows: 22,080
+## Columns: 7
+## Groups: year, scenario, gcm [240]
+## $ dt       &lt;date&gt; 2070-06-01, 2070-06-01, 2070-06-01, 2070-06-01, 2070-06-01, ~
+## $ year     &lt;dbl&gt; 2070, 2070, 2070, 2070, 2070, 2070, 2070, 2070, 2070, 2070, 2~
+## $ cvar     &lt;fct&gt; tasmax, tasmax, tasmax, tasmax, tasmax, tasmax, tasmax, tasma~
+## $ scenario &lt;fct&gt; rcp45, rcp45, rcp45, rcp45, rcp85, rcp85, rcp85, rcp85, rcp45~
+## $ gcm      &lt;fct&gt; HadGEM2-ES, CNRM-CM5, CanESM2, MIROC5, HadGEM2-ES, CNRM-CM5, ~
+## $ temp_f   [degF] 79.84528 [degF], 106.15573 [degF], 90.13398 [degF], 95.24855~
+## $ hd       &lt;lgl&gt; FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, ~</code></pre>
+<p><br />
+</p>
+<p>Next, we have to write a function that we can feed into <code>group_modify()</code>. If you read the documentation for group_modify(), it says the first two arguments of the function should accept i) a group of rows (as a tibble), ii) the properties of the group (e.g., which year, scenario, and gcm) as a 1-row tibble. our function should also return a tibble, that will be stacked for all the groups. In addition, <code>group_modify()</code> will also automatically include columns for the grouping variables.</p>
+<p>In our case, all we need is the number of heatspells so the function only has to return a 1x1 tibble.</p>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="04_metrics-methods.html#cb120-1" aria-hidden="true" tabindex="-1"></a>num_heatspells <span class="ot">&lt;-</span> <span class="cf">function</span>(data_tbl, key_tbl, <span class="at">num_days =</span> <span class="dv">3</span>) {</span>
+<span id="cb120-2"><a href="04_metrics-methods.html#cb120-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Feed the hd column into rle()</span></span>
+<span id="cb120-3"><a href="04_metrics-methods.html#cb120-3" aria-hidden="true" tabindex="-1"></a>  rle_lst <span class="ot">&lt;-</span> <span class="fu">rle</span>(data_tbl<span class="sc">$</span>hd)</span>
+<span id="cb120-4"><a href="04_metrics-methods.html#cb120-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb120-5"><a href="04_metrics-methods.html#cb120-5" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Return a tibble with one row</span></span>
+<span id="cb120-6"><a href="04_metrics-methods.html#cb120-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">num_spells =</span> <span class="fu">sum</span>(rle_lst<span class="sc">$</span>values <span class="sc">&amp;</span> rle_lst<span class="sc">$</span>lengths <span class="sc">&gt;=</span> num_days))</span>
+<span id="cb120-7"><a href="04_metrics-methods.html#cb120-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><br />
+</p>
+<p>Now we can apply this function to every group:</p>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="04_metrics-methods.html#cb121-1" aria-hidden="true" tabindex="-1"></a>bkrfld_numspells_tbl <span class="ot">&lt;-</span> bkrfld_grps_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb121-2"><a href="04_metrics-methods.html#cb121-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_modify</span>(<span class="at">.f =</span> num_heatspells, <span class="at">num_days =</span> <span class="dv">3</span>)</span>
+<span id="cb121-3"><a href="04_metrics-methods.html#cb121-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb121-4"><a href="04_metrics-methods.html#cb121-4" aria-hidden="true" tabindex="-1"></a>bkrfld_numspells_tbl <span class="sc">%&gt;%</span> <span class="fu">head</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 4
+## # Groups:   year, scenario, gcm [6]
+##    year scenario gcm        num_spells
+##   &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;           &lt;int&gt;
+## 1  2070 rcp45    CanESM2             7
+## 2  2070 rcp45    CNRM-CM5            6
+## 3  2070 rcp45    HadGEM2-ES          5
+## 4  2070 rcp45    MIROC5              5
+## 5  2070 rcp85    CanESM2             3
+## 6  2070 rcp85    CNRM-CM5            6</code></pre>
+<p>Lastly, we can compute the average number of heatspells per emissions scenario:</p>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="04_metrics-methods.html#cb123-1" aria-hidden="true" tabindex="-1"></a>bkrfld_numspells_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb123-2"><a href="04_metrics-methods.html#cb123-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(scenario) <span class="sc">%&gt;%</span> </span>
+<span id="cb123-3"><a href="04_metrics-methods.html#cb123-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg_spells =</span> <span class="fu">mean</span>(num_spells)) </span></code></pre></div>
+<pre><code>## # A tibble: 2 x 2
+##   scenario avg_spells
+##   &lt;fct&gt;         &lt;dbl&gt;
+## 1 rcp45          4.79
+## 2 rcp85          3.98</code></pre>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="03_time-series-viz.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="05_agroclimate-metrics.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "none",
+"toc_depth": 2
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

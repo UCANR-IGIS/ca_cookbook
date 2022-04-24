@@ -1,0 +1,17 @@
+output_dir: docs
+book_filename: "cookbook"
+rmd_files: ["index.Rmd",
+            "02_api-requests.Rmd",
+            "03_time-series-viz.Rmd", 
+            "04_metrics-methods.Rmd", 
+            "05_agroclimate-metrics.Rmd", 
+            "06_degday.Rmd", 
+            "07_joining-other-data.Rmd", 
+            "08_raster-analyses.Rmd",
+            "09_shiny.Rmd",
+            "99_references.Rmd"]
+delete_merged_file: true
+language:
+  ui:
+    appendix_name: "Appendix "
+    chapter_name: "Chapter "

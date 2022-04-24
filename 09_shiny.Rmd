@@ -1,0 +1,46 @@
+# Shiny Apps
+
+caladaptr can be used in Shiny Apps to retrieve data from the API on-the-fly. 
+
+To try out some of these apps, see <https://github.com/ucanr-igis/caladaptr.apps>
+
+To show a spinner while data is being fetched, you can do this [exampe](https://github.com/ucanr-igis/caladaptr.apps/blob/master/inst/shiny/timeseries/app.r):
+
+```
+show_spinner() 
+my_vals <- ca_getvals_tbl(pt_cap(), quiet = TRUE) 
+hide_spinner() 
+```
+
+To show a progress bar that updates as data is being retrieved, you can pass a Shiny progress object to `ca_getvals_tbl()` ([example](https://github.com/UCANR-IGIS/caladaptr.apps/blob/master/inst/shiny/chill/app.R)):
+
+```
+progress <- shiny::Progress$new()
+on.exit(progress$close())
+
+progress$set(value = 0, message = "Fetching data from Cal-Adapt:")
+    
+## Get values
+pt_daytmp_tbl <- ca_getvals_tbl(pt_prj_cap(), quiet = TRUE, shiny_progress = progress) 
+```
+
+Additional Tips:
+
+*Deploying your Shiny app without being blocked *
+
+If you'll be hosting your ShinyApp on the cloud, there's a slight possibility that the IP address might be blocked by Cal-Adapt (due to precautions they've had to take to defend against DOS attacks)
+
+ - ShinyApps.io works fine (those IP addresses have been white listed)
+ 
+ - GoogleCloud IP addresses are all blocked
+ 
+If this is a problem, one solution is to 1) get a VM with a stable IP address, 2) ask the administrator of the Cal-Adapt API to white list that IP address.
+ 
+*Memory*
+ 
+Also, be cognizant of the amount of RAM memory you have to work with. Climate data can quickly consume hundreds of megabytes, and its not uncommon for R to make copies of data frames when doing manipulations. If you're working on a VM that only has 1 GB of RAM, you can quickly run out of memory. This can be difficult to diagnose, but if your app is working fine on your laptop, but disconnected unexpectedly when you run it on ShinyApps.io, then check the logs for an out-of-memory error. 
+
+Your options for dealing with out-of-memory errors include getting a VM with more RAM (which could cost you $), using `ca_getvals_db()` (which dumps values into a SQLite database) instead of `ca_getvals_tbl()`, redesigning your app for more efficient use of memory, or making your app available as a zip file that users can run locally from their RStudio.
+
+<p style="font-size:150%; font-style:italic;">More coming soon...</p>
+

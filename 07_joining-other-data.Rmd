@@ -1,0 +1,20 @@
+# Joining Other Tables
+
+Most analyses of climate impacts combine 
+
+
+
+<p style="font-style:italic;">Coming soon...</p>
+
+<!------------------------
+
+do something with CalEnviro Screen
+
+or school districts (which you can get from tigris)
+
+
+Joining values back to locations
+file:///D:/GitHub/cal-adapt/caladaptr-res/docs/workshops/caladaptr_intro_dec20/nb3.nb.html
+------->
+
+
