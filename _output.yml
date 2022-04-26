@@ -11,11 +11,10 @@ bookdown::gitbook:
         <li><a href="./"><strong>Cooking with Cal-Adapt</strong></a></li>
       after: |
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with Bookdown</a></li>
-#   edit: https://github.com/USERNAME/REPO/edit/BRANCH/%s
-#   download: ["pdf", "epub"]    
     fontsettings:
       theme: white
       family: sans
       # size: 3
       
 #bookdown::epub_book: default
+# download: ["pdf", "epub"]    

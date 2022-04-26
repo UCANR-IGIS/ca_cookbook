@@ -10,6 +10,8 @@ rmd_files: ["index.Rmd",
             "08_raster-analyses.Rmd",
             "09_shiny.Rmd",
             "99_references.Rmd"]
+view: 'https\://github.com/ucanr-igis/ca_cookbook/edit/master/%s'
+edit: 'https\://github.com/ucanr-igis/ca_cookbook/edit/master/%s'
 delete_merged_file: true
 language:
   ui:

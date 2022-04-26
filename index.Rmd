@@ -5,14 +5,13 @@ site: bookdown::bookdown_site
 documentclass: book
 bibliography: [references.bib]
 link-citations: true
-# url: your book url like https://bookdown.org/yihui/bookdown
-# cover-image: path to the social sharing image like images/cover.jpg
+url: 'https\://ucanr-igis.github.io/ca_cookbook/'
+github-repo: ucanr-igis/ca_cookbook
+cover-image: ./images/cookbook-cover_640x480.jpg
 # description: |
 #   This is a minimal example of using the bookdown package to write a book.
 #   The HTML output format for this example is bookdown::gitbook,
 #   set in the _output.yml file.
-# link-citations: yes
-# github-repo: rstudio/bookdown-demo
 ---
 
 ```{r setup_index, include = FALSE}
